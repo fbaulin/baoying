@@ -4,15 +4,23 @@
 Main features different from matbplotlib and plotly
 - labels on hovers
 - markers on clicks
+- horizontal and vertical lines
 - simplified use of animation
 - data based visualization improvement
     - smart colors (based on the number of curves)
     - smart ad-hoc scaling
+- easily axesed double-valued axes
 - ? interactive plot control
+
+- saving data
 
 Data is contained in a container,
 then operator makes a decision which plot he whants to adjust
 and select different kinds of plots
+
+
+Notes:
+- use plotting in a newly spawned processes for interactive?
 
 """
 
@@ -22,19 +30,31 @@ from matplotlib import plot as plt
 class Data:
 
 
-    def __init__(self, renderer=None, graph_type=None, frame_mode=False) -> None:
+    def __init__(self,
+                 renderer=None,
+                 graph_type=None,
+                 animate=False,
+                 x_axes=None,
+                 xlabels=None,
+                 ylabels=None,
+                 share_axis=False
+                 ) -> None:
         # data and curve properties
-        self.Y=[]       # data is stored in list or lols and rendered to np only when drawing
-        self.X=[]
+        self.Y = []       # data is stored in list or lols and rendered to np only when drawing
+        self.X = []                 if x_axes is None else x_axes
         self.names = []
-        self.colors=[]
-        self.widths=[]
-        self.opacities=[]
+        self.xlabels = []           if xlabels is None else xlabels
+        self.ylabels = []           if ylabels is None else ylabels
+        self.colors = []
+        self.widths = []
+        self.lines = []
+        self.opacities = []
         # plotting properties
-        self.renderer = 'browser' if renderer is None else renderer
-        self.graph_type = graph_type        # default type of graph
-        self.frame_mode = frame_mode        # if frame mode true, the data is treated as 3d
-        self.fig=None
+        self.share_ax = share_axis      # share axes to reduce amount of data
+        self.renderer = 'browser'   if renderer is None else renderer
+        self.graph_type = graph_type    # default type of graph
+        self.animate = animate          # if frame mode true, the data is treated as 3d
+        self.fig = None
 
 
     def add(self, Y,
@@ -105,7 +125,7 @@ class Data:
 
     def vertline(self):
         pass
-    
+
 
     @staticmethod
     def load():
