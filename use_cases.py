@@ -45,6 +45,7 @@ data.color[2] = 'y0.1'  # change color using matlab short names + brightness val
 
 data.set_axis(xaxis, alt_axis=xaxis_alt)   # adding x axis in the beginning (or the end)
 data.curves()    # curve plots
+data.curves(subploted=True)    # split data to different subplots
 data.animate(fps=0.1)   # single curve but animated (args: filename)
 
 data.set_axes(Xmesh)   # adding x-y axes in the beginning (or the end)
@@ -58,6 +59,8 @@ data.heatmap()   # heat map (only when shared axis)
 # Creating a figure
 data = by.data()
 # Data is accumulated in the data
+# NB!   add should support .curves' args
+#       use curves alias for add?
 data.add(Ydata)
 data.add(Ydata**(1/2))
 data.add(Ydata**(1/3))
@@ -110,6 +113,32 @@ data = by.data()
 for i in range(24):
     data.add(Ydata)
     
+
+#%% 
+# Heterogeneoues data with different parameter cases
+"""When a set of data added from different sets"""
+
+for p in [1, 2, 4]:
+    common_x = np.linspace(0,10,128)
+    a_data = p * common_x**2
+    b_data = p * common_x**3
+    by.curves(a_data,common_x)      # use undocumented default thing p=[]?
+    by.curves(b_data,common_x)
+by.curves(render='browser')
+
+
+# Changed to aggregational via OOP
+data = by.Data()
+for p in [1, 2, 4]:
+    common_x = np.linspace(0,10,128)
+    a_data = p * common_x**2
+    b_data = p * common_x**3
+    data.add(a_data,common_x)    # if x, y supported for curves, don't plot so it could be used instead of add?
+    data.add(b_data,common_x)
+    data.case()    # close this case (should work whether in beginning or an end)
+data.curves()
+# cases are shown in: colors, markers, subplots
+
 
 #%%
 """Extra features"""

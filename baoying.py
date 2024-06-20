@@ -126,6 +126,17 @@ class Data:
     def vertline(self):
         pass
 
+    # Start new frame of data
+    def case(self, name=None):
+        """
+        name - name of the case
+                if case was supplied before any data, 
+                than the name is associated with the following data
+                if case was supplied after data add, 
+                than the name is associated with the preciding following data
+        """
+        pass
+
 
     @staticmethod
     def load():
