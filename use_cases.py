@@ -1,7 +1,9 @@
+#%%
 """ This file contains use cases
 """
 import baoying as by
 import numpy as np
+import pandas as pd
 
 xaxis = np.linspace(-4,4)
 xaxis_alt = 3e8/xaxis
@@ -26,8 +28,8 @@ by.curves(Ydata, xaxis)
 # # Run multiple curves on-the-go - basically a wrapper around Data class
 # f = by.figure() #
 # # list in the figure all preferences that could be common for the plots
-# by.curves(ydata)
-# by.curves(ydata+1)
+# f.curves(ydata)
+# f.curves(ydata+1)
 # f.show()        # mode=('curves','subplots')
 
 
@@ -57,7 +59,7 @@ data.heatmap()   # heat map (only when shared axis)
 #%%
 """ Multiple 2D pictures """
 # Creating a figure
-data = by.data()
+data = by.Data()
 # Data is accumulated in the data
 # NB!   add should support .curves' args
 #       use curves alias for add?
@@ -135,9 +137,13 @@ for p in [1, 2, 4]:
     b_data = p * common_x**3
     data.add(a_data,common_x)    # if x, y supported for curves, don't plot so it could be used instead of add?
     data.add(b_data,common_x)
-    data.case()    # close this case (should work whether in beginning or an end)
+    data.case(axis='p param', name=f'{p}us')    # parameter axis is optional for single layer cycle
+                                                # parameter axis is required for multi layer cycle
 data.curves()
-# cases are shown in: colors, markers, subplots
+# cases are shown in: colors, markers, subplots, widths
+
+data.show({0:'colors', 1:'subplots'})   # draw with differences in 
+data.show({0:'widths', 'p_param':'markers'})
 
 
 #%%

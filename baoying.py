@@ -25,6 +25,10 @@ Notes:
 """
 
 from matplotlib import plot as plt
+import numpy as np
+from  plotly import graph_objects as go
+from  plotly.subplots import make_subplots
+import pandas as pd
 
 
 class Data:
@@ -45,16 +49,15 @@ class Data:
         self.names = []
         self.xlabels = []           if xlabels is None else xlabels
         self.ylabels = []           if ylabels is None else ylabels
-        self.colors = []
-        self.widths = []
-        self.lines = []
-        self.opacities = []
         # plotting properties
         self.share_ax = share_axis      # share axes to reduce amount of data
         self.renderer = 'browser'   if renderer is None else renderer
         self.graph_type = graph_type    # default type of graph
         self.animate = animate          # if frame mode true, the data is treated as 3d
         self.fig = None
+        self.graph_type = dict()        # graph type sets the axis type
+        self.df = None                  # dataframe with the y data, x data and settings
+        self.preframe = None            # flag of framing before data or after
 
 
     def add(self, Y,
@@ -66,19 +69,17 @@ class Data:
             ):
         """
         add new dataset
+        supplies plotting parameters and stores those for transfering to later
+            
         """
-        self.Y.append(Y) # solve how to distinguish
-        self.X.append(X)
+        if df is None:
+            self.preframe=False
+            df = pd.DataFrame(columns=['axis0'])
         if color is None: self.colors.append(None)
-        elif isinstance(color, str): self.colors.append(name2rgb(color))
-        elif isinstance(color, list): self.colors.append(color)
+        elif isinstance(color, str): name2rgb(color)
+        elif isinstance(color, list): color
         self.widths.append(width)
         self.opacities.append(opacity)
-
-
-    def frame(self, **kwargs):
-        """ add new frame, if  data supplied in kwargs, add curves through add """
-        pass
 
 
     def update(self, id, **kwargs):
@@ -89,9 +90,9 @@ class Data:
         if isinstance(id, int): pass    # id - number of the data
         elif isinstance(id, str): pass  # id - name of the curve
 
-
+    # Runs building curves
     def curves(self):
-        pass
+        self.show({0})     # run show with
 
 
     def mesh(self):
@@ -127,14 +128,26 @@ class Data:
         pass
 
     # Start new frame of data
-    def case(self, name=None):
+    def case(self, axis=None, name=None):
         """
-        name - name of the case
+        case method (should work whether in beginning or an end)
+        #NOTE! when cases accessed the index starts with the outter most
+        axis - name of the axis cases (for instance axis='Linewidth')
+        name - name of the case 
                 if case was supplied before any data, 
                 than the name is associated with the following data
                 if case was supplied after data add, 
                 than the name is associated with the preciding following data
         """
+        if self.df is None:     # set the flag of preframing
+            self.preframe=True
+        if self.preframe:       # engage frame before data add
+            pass                # create dataframe
+        else:                   # engage frame after data add
+            pass                # add column & modify dataframes rows if parameters are supplied
+
+    # render data
+    def show(structure):
         pass
 
 
@@ -150,7 +163,7 @@ def name2rgb(name):
 def rgb2name(r,g,b):
     pass
 
-
+# This method operates via data structure
 def curves():
     pass
 
@@ -167,10 +180,14 @@ def export():
     pass
 
 
-def plotit():
-    """ Plotting method """
+def plotit( y, x=None, title:str=None, legend=None, 
+            x_label=None, y_label=None, x_lims:list=None, y_lims:list=None,
+            x_scale="linear", y_scale="linear", 
+            error_x=None, error_y=None, error_thickness=1.0, dashes=None, widths=None,
+            opacity=None, mode='lines', colors=None, renderer=None, file_name=None, figure=None, row_col=[None, None] 
+        ):
     pass
+
 
 def export():
     pass
-
