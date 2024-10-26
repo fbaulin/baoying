@@ -162,36 +162,36 @@ def plotit_legacy(y, x=None,
     if isinstance(row_col, int):
         row_col = divmod(row_col, 10)
 
-    for p in plots:  fig.add_trace(p, row=row_col[0], col=row_col[1])    
-    fig.update_layout(showlegend=showlegend, template='none')   
-    fig.update_xaxes(title_text=x_label, range=x_lims, type=x_scale, tickformat='s')    
-    fig.update_yaxes(title_text=y_label, range=y_lims, type=y_scale, tickformat='s')    
-    
-    if   renderer is None:        
-        if figure is None:             fig.show()        
-        else:                          pass   
-    elif renderer is False:            pass    
-    elif renderer is True:                     
-        if figure is None:             fig.show(renderer='browser')        
-        else:                          pass    
-    elif isinstance(renderer, str):    fig.show(renderer=renderer)    
-    else:raise TypeError('Renderer type error')    
-    if file_name is not None: fig.write_image(file_name)    
+    for p in plots:  fig.add_trace(p, row=row_col[0], col=row_col[1])
+    fig.update_layout(showlegend=showlegend, template='none')
+    fig.update_xaxes(title_text=x_label, range=x_lims, type=x_scale, tickformat='s')
+    fig.update_yaxes(title_text=y_label, range=y_lims, type=y_scale, tickformat='s')
+
+    if   renderer is None:
+        if figure is None:             fig.show()
+        else:                          pass
+    elif renderer is False:            pass
+    elif renderer is True:
+        if figure is None:             fig.show(renderer='browser')
+        else:                          pass
+    elif isinstance(renderer, str):    fig.show(renderer=renderer)
+    else:raise TypeError('Renderer type error')
+    if file_name is not None: fig.write_image(file_name)
     if figure is not None: return None  #  supplied figure var is changed -> function must retuen None
 
 
 
-def plotit_llm_update(y, x=None, 
-           title: str = None, legend=None, 
-           x_label=None, y_label=None, 
-           x_lims: list = None, y_lims: list = None, 
-           x_scale="linear", y_scale="linear", 
-           error_x=None, error_y=None, error_thickness=1.0, 
-           dashes=None, widths=None, opacity: Iterable = None, mode='lines', 
-           colors=None, 
-           renderer=None, 
-           file_name=None, 
-           figure=None, row_col=[None, None]):
+def plotit(	y, x=None,
+            title: str = None, legend=None,
+            x_label=None, y_label=None,
+            x_lims: list = None, y_lims: list = None,
+            x_scale="linear", y_scale="linear",
+            error_x=None, error_y=None, error_thickness=1.0,
+            dashes=None, widths=None, opacity:Iterable = None, mode='lines',
+            colors=None,
+            renderer=None,
+            file_name=None,
+            figure=None, row_col=[None, None]):
     """
     Plot data using plotly.
     Args:
@@ -229,7 +229,7 @@ def plotit_llm_update(y, x=None,
             y = np.stack(y, axis=1)
         else:
             y = np.concatenate(y, axis=1)
-    
+
     if isinstance(error_y, bool) and error_y:
         error_y = np.concatenate([np.std(arr, axis=1, keepdims=True) for arr in y], axis=1)
         y = np.concatenate([np.mean(arr, axis=1, keepdims=True) for arr in y], axis=1)
@@ -249,27 +249,33 @@ def plotit_llm_update(y, x=None,
         x = np.arange(y.shape[0])
     plots = [
         go.Scatter(
-            x=x, y=y[:, i], mode=mode, name=legend[i], 
-            line=line_properties[i], 
+            x=x, y=y[:, i], mode=mode, name=legend[i],
+            line=line_properties[i],
             opacity=opacity[i] if opacity else None,
             error_x=dict(type='data', array=error_x[:, i], visible=True, thickness=error_thickness) if isinstance(error_x, np.ndarray) else None,
             error_y=dict(type='data', array=error_y[:, i], visible=True, thickness=error_thickness) if isinstance(error_y, np.ndarray) else None
-        ) 
+        )
         for i in range(n_plot_lines)
     ]
     if figure is None:
         fig = go.Figure(layout=go.Layout(showlegend=True, title=title))
     elif isinstance(figure, list):
-        if not figure:
+        if len(figure)==0:
             figure.append(go.Figure(layout=go.Layout(title=title)))
-        if figure[-1] is None:
+        elif figure[-1] is None:
             figure[-1] = go.Figure(layout=go.Layout(title=title))
+        elif isinstance(figure[-1], int):
+            f = figure[-1]
+            f = (f,1) if f<10 else divmod(f)
+            figure[-1] = make_subplots(*f, shared_xaxes='columns')
         fig = figure[-1]
     else:
         fig = figure
 
     if isinstance(row_col, int):
-        row_col = divmod(row_col, 10)
+        if row_col<=10:
+            row_col = (row_col, 1)
+        else:		   row_col = divmod(row_col, 10)
     for p in plots:
         fig.add_trace(p, row=row_col[0], col=row_col[1])
     fig.update_layout(template='none')
