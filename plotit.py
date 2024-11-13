@@ -16,6 +16,8 @@ from plotly.colors import qualitative
 import matplotlib
 from matplotlib import pyplot as plt
 
+from matplotlib.animation import FuncAnimation  # библиотека для анимации
+
 
 # Вывод графиков с использованием plotly
 def plotit_plotly(
@@ -241,6 +243,80 @@ def plotit_pyplot(
         ax.figure.canvas.manager.window.raise_()  # Only runs if Qt5Agg is used
     # ax.figure.tight_layout()
     if figure is not None: 	return figure, ax
+
+
+# Анимация
+def run_animation(y, x=None, save_file=None, x_label='x', y_label='y', titles=None):
+    """_summary_
+
+    Args:
+        y (_type_): _description_
+        x (_type_, optional): _description_. Defaults to None.
+        save_file (_type_, optional): _description_. Defaults to None.
+        x_label (str, optional): _description_. Defaults to 'x'.
+        y_label (str, optional): _description_. Defaults to 'y'.
+        titles (_type_, optional): _description_. Defaults to None.
+
+    Returns:
+        _type_: _description_
+
+    Example 1. Animate list of single plots
+        >>> import numpy as np
+        >>> import matplotlib
+        >>> matplotlib.use('Qt5Agg')
+        >>> from matplotlib import pyplot as plt
+        >>> plt.ion()
+        >>> from plotit import run_animation as animate
+        >>> t = np.linspace(0,1,100)
+        >>> phis = np.linspace(0,2*np.pi,10)
+        >>> y = [np.sin(10*t+phi) for phi in phis]
+        >>> animate(y, t, titles=[f'φ={phi:0.1f} rad' for phi in phis])
+
+    """
+    
+    # Check if the current backend is non-interactive and switch if needed
+    if matplotlib.get_backend() not in ['Qt4Agg', 'Qt5Agg', 'TkAgg']: raise RuntimeError(f"Only 'Qt4Agg', 'Qt5Agg', 'TkAgg' are supported, but {matplotlib.get_backend()} is used. Try running matplotlib.use('Qt5Agg').")
+    if isinstance(y, (list, tuple)): 
+        y = np.stack(y, axis=0)
+        
+    fig, ax = plt.subplots()
+    ax.set(xlabel=x_label, ylabel=y_label, xlim=(np.min(x), np.max(x)), ylim=(1.1 * np.min(y), 1.1 * np.max(y)))
+    lines = []
+    if x is None: x = np.arange(y[0].shape[-1])
+
+    if y.ndim == 3:  # If y is a 3D array, create multiple lines
+        for i in range(y.shape[0]):
+            line, = ax.plot([], [], lw=1.5)
+            lines.append(line)
+    else:  # If y is a 2D array, create a single line
+        line, = ax.plot([], [], lw=1.5)
+        lines.append(line)
+
+    def init():
+        for line in lines:
+            line.set_data([], [])
+        return lines
+
+    def animate(i):
+        # Update each line's data based on the frame index i
+        if y.ndim == 3:  # Animate multiple lines
+            for j, line in enumerate(lines):
+                line.set_data(x, y[j, i, :])
+        else:  # Animate a single line
+            lines[0].set_data(x, y[i, :])
+        
+        # Set the title for the current frame, if titles are provided
+        if titles is not None and i < len(titles):
+            ax.set_title(titles[i])
+        return lines
+
+    blit = titles is None   # if no titles than redraw only lines
+    anim = FuncAnimation(fig, animate, init_func=init, frames=y.shape[-2], interval=100, blit=blit, repeat=True, repeat_delay=100)
+    if save_file is not None:
+        anim.save(save_file, writer='PillowWriter', dpi=96, fps=12, bitrate=256)
+
+    plt.show()
+    return anim
 
 
 # Отображение созвездия
