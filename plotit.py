@@ -127,7 +127,7 @@ def plotit_plotly(
             ax[-1] = go.Figure(layout=go.Layout(title=title))
         elif isinstance(ax[-1], int):
             f = ax[-1]
-            f = (f,1) if f<10 else divmod(f)
+            f = (f,1) if f<10 else divmod(f, 10)
             ax[-1] = make_subplots(*f, shared_xaxes='columns')
         fig = ax[-1]
     else:
